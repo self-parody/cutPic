@@ -6,6 +6,8 @@ from tkinter import messagebox
 from tkinter.filedialog import askdirectory
 import os
 import time
+import numpy as np
+
 root = tk.Tk()
 root.title('批量裁剪图片')
 root.geometry('450x350+500+100')
@@ -52,6 +54,7 @@ def submit_path(event):
     if(img_path_value=='' or save_path_value=='' or top_width_value=='' or top_height_value=='' or middle_width_value=='' or middle_height_value=='' or bottom_width_value=='' or bottom_height_value==''):
         tk.messagebox.showwarning('Warning', '路径选择和尺寸输入不能为空')
     else:
+
         start_thread()  # 在子线程中进行裁剪功能，解决窗体长时间无响应的问题
         pb.place(x=150, y=300)  # 显示进度条
         pb_start()
@@ -118,18 +121,22 @@ submit_path_btn = tk.Button(root, text='submit',font=('Arial',12), bg='#6495ED')
 submit_path_btn.place(x=170, y=260, width='100')
 submit_path_btn.bind('<Button-1>', submit_path)
 
+#解决读取文件路径中有中文时的报错问题
+def cv_imread(filePath):
+    cv_img=cv2.imdecode(np.fromfile(filePath,dtype=np.uint8),-1)
+    return cv_img
 
 # 裁剪功能
 def cut_picture():
-
-
+    print(img_path_value)
     for filename in os.listdir(img_path_value):
         top_filename = os.path.splitext(filename)[0] + '_1' + os.path.splitext(filename)[-1]
         middle_filename = os.path.splitext(filename)[0] + '_2' + os.path.splitext(filename)[-1]
         bottom_filename = os.path.splitext(filename)[0] + '_3' + os.path.splitext(filename)[-1]
 
         file=img_path_value + '/' + filename
-        img = cv2.imread(file)
+        img=cv_imread(file)
+        # img = cv2.imread(file)
         # print(img.shape)
         # 分别进行上、中、下裁剪，并创建相应文件夹，将剪裁后的图片分别写入
         top_width_num=int(top_width_value)
@@ -152,9 +159,13 @@ def cut_picture():
             os.makedirs(middle_dir)
         if not os.path.exists(bottom_dir):
             os.makedirs(bottom_dir)
-        cv2.imwrite(top_dir + '/' + top_filename, cropped_top)
-        cv2.imwrite(middle_dir + '/' + middle_filename, cropped_top)
-        cv2.imwrite(bottom_dir + '/' + bottom_filename, cropped_top)
+        # cv2.imwrite(top_dir + '/' + top_filename, cropped_top)
+        # cv2.imwrite(middle_dir + '/' + middle_filename, cropped_top)
+        # cv2.imwrite(bottom_dir + '/' + bottom_filename, cropped_top)
+        #解决写入文件的路径有中文时报错的问题
+        cv2.imencode('.jpg', img)[1].tofile(top_dir + '/' + top_filename)
+        cv2.imencode('.jpg', img)[1].tofile(middle_dir + '/' + middle_filename)
+        cv2.imencode('.jpg', img)[1].tofile(bottom_dir + '/' + bottom_filename)
 
 def close_window():
     root.destroy()
