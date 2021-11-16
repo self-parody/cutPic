@@ -160,12 +160,11 @@ def cut_picture():
         if not os.path.exists(bottom_dir):
             os.makedirs(bottom_dir)
         # cv2.imwrite(top_dir + '/' + top_filename, cropped_top)
-        # cv2.imwrite(middle_dir + '/' + middle_filename, cropped_top)
-        # cv2.imwrite(bottom_dir + '/' + bottom_filename, cropped_top)
+
         #解决写入文件的路径有中文时报错的问题
-        cv2.imencode('.jpg', img)[1].tofile(top_dir + '/' + top_filename)
-        cv2.imencode('.jpg', img)[1].tofile(middle_dir + '/' + middle_filename)
-        cv2.imencode('.jpg', img)[1].tofile(bottom_dir + '/' + bottom_filename)
+        cv2.imencode('.jpg', cropped_top)[1].tofile(top_dir + '/' + top_filename)
+        cv2.imencode('.jpg', cropped_middle)[1].tofile(middle_dir + '/' + middle_filename)
+        cv2.imencode('.jpg', cropped_bottom)[1].tofile(bottom_dir + '/' + bottom_filename)
 
 def close_window():
     root.destroy()
